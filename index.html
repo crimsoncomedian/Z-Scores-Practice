@@ -1,0 +1,1065 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Z-Score Practice</title>
+
+<style>
+:root {
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --panel: #f8fafc;
+  --text: #172033;
+  --muted: #667085;
+  --border: #dbe2ea;
+  --blue: #2563eb;
+  --blue-soft: #eff6ff;
+  --green: #166534;
+  --green-soft: #f0fdf4;
+  --red: #b91c1c;
+  --red-soft: #fff1f2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.app {
+  width: min(850px, calc(100% - 24px));
+  margin: 28px auto;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 2px 14px rgba(16, 24, 40, 0.05);
+}
+
+.small-label {
+  font-size: 0.86rem;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+/* DATA SET */
+
+.data-set {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0 20px;
+}
+
+.data-value {
+  min-width: 52px;
+  text-align: center;
+  padding: 12px 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--panel);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-value.target {
+  border: 2px solid var(--blue);
+  background: var(--blue-soft);
+  color: #1d4ed8;
+  padding: 11px 9px;
+}
+
+/* MEAN AND STANDARD DEVIATION */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stat {
+  text-align: center;
+  padding: 15px 8px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--panel);
+}
+
+.stat .value {
+  font-size: 1.85rem;
+  font-weight: 800;
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* QUESTION AND ANSWER */
+
+.question {
+  font-weight: 750;
+  text-align: center;
+  margin: 22px 0 16px;
+  font-size: 1.05rem;
+}
+
+.answer-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.answer-area label {
+  font-size: 1.5rem;
+  font-style: italic;
+  font-weight: 750;
+}
+
+.answer-input {
+  width: 150px;
+  height: 55px;
+  text-align: center;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.answer-input:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.answer-input.wrong,
+.answer-input.wrong:focus {
+  border-color: var(--red);
+  background: var(--red-soft);
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.10);
+}
+
+.answer-input.right {
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+/* BUTTONS */
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+button {
+  border-radius: 9px;
+  min-height: 44px;
+  padding: 10px 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.primary {
+  border: 1px solid var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+
+.primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.secondary {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+}
+
+.secondary:hover {
+  background: var(--panel);
+}
+
+/* FEEDBACK */
+
+.feedback {
+  margin-top: 16px;
+  padding: 13px 16px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 750;
+  line-height: 1.5;
+}
+
+.feedback[hidden] {
+  display: none;
+}
+
+.feedback.good {
+  color: var(--green);
+  background: var(--green-soft);
+  border: 1px solid #bbf7d0;
+}
+
+.feedback.bad {
+  color: var(--red);
+  background: var(--red-soft);
+  border: 1px solid #fecaca;
+}
+
+/* VISUAL EXPLANATION */
+
+.explanation {
+  margin-top: 18px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 18px;
+  background: var(--card);
+}
+
+.explanation[hidden] {
+  display: none;
+}
+
+.explanation-title {
+  font-weight: 750;
+  margin-bottom: 14px;
+}
+
+.visual {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  padding: 13px 8px;
+  border-radius: 11px;
+}
+
+.visual-label {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-bottom: 8px;
+}
+
+svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.direction {
+  margin: 13px 0;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* WORKED CALCULATION */
+
+.calculation {
+  border-top: 1px solid var(--border);
+  padding-top: 17px;
+  margin-top: 17px;
+}
+
+.formula {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin: 15px 0 3px;
+  font-weight: 700;
+  font-size: 1.16rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.5;
+  min-width: 56px;
+}
+
+.fraction .top {
+  border-bottom: 2px solid currentColor;
+  padding: 0 8px 4px;
+}
+
+.fraction .bottom {
+  padding: 4px 8px 0;
+}
+
+.final-value {
+  color: #1d4ed8;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 600px) {
+  .app {
+    margin: 15px auto;
+  }
+
+  .card {
+    padding: 16px 12px;
+  }
+
+  .data-value {
+    min-width: 43px;
+    padding: 10px 8px;
+  }
+
+  .data-value.target {
+    padding: 9px 7px;
+  }
+
+  .stat .value {
+    font-size: 1.55rem;
+  }
+
+  .formula {
+    font-size: 1rem;
+    gap: 7px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="app">
+
+  <section class="card">
+
+    <div class="small-label">
+      Data Set
+    </div>
+
+    <div id="dataSet" class="data-set"></div>
+
+    <div class="stats">
+
+      <div class="stat">
+        <div class="small-label">
+          Mean (μ)
+        </div>
+        <div id="meanValue" class="value"></div>
+      </div>
+
+      <div class="stat">
+        <div class="small-label">
+          Standard Deviation (σ)
+        </div>
+        <div id="sdValue" class="value"></div>
+      </div>
+
+    </div>
+
+    <div class="question">
+      Find the z-score of
+      <span id="targetValue"></span>.
+    </div>
+
+    <div class="answer-area">
+
+      <label for="answerInput">
+        z =
+      </label>
+
+      <input
+        id="answerInput"
+        class="answer-input"
+        type="text"
+        inputmode="decimal"
+        autocomplete="off"
+        placeholder="?"
+      >
+
+    </div>
+
+    <div class="actions">
+
+      <button
+        id="checkButton"
+        class="primary"
+        type="button">
+        Check Answer
+      </button>
+
+      <button
+        id="nextButton"
+        class="secondary"
+        type="button">
+        Next Question
+      </button>
+
+    </div>
+
+    <div
+      id="feedback"
+      class="feedback"
+      aria-live="polite"
+      hidden>
+    </div>
+
+    <!-- Hidden until an answer is submitted -->
+
+    <section
+      id="explanation"
+      class="explanation"
+      hidden>
+
+      <div
+        id="explanationTitle"
+        class="explanation-title">
+        Visual Explanation
+      </div>
+
+      <div class="visual">
+
+        <div class="visual-label">
+          Each interval represents 1 standard deviation.
+        </div>
+
+        <svg
+          id="numberLine"
+          viewBox="0 0 650 194"
+          role="img"
+          aria-label="Number line showing the mean and target value">
+        </svg>
+
+      </div>
+
+      <div
+        id="direction"
+        class="direction">
+      </div>
+
+      <div class="calculation">
+
+        <div class="visual-label">
+          Calculate the z-score
+        </div>
+
+        <div
+          id="formula"
+          class="formula">
+        </div>
+
+      </div>
+
+    </section>
+
+  </section>
+
+</main>
+
+<script>
+(function() {
+  "use strict";
+
+  /* ========================================
+     DOM
+     ======================================== */
+
+  const $ = id => document.getElementById(id);
+
+  const dataSet = $("dataSet");
+  const meanValue = $("meanValue");
+  const sdValue = $("sdValue");
+  const targetValue = $("targetValue");
+
+  const answerInput = $("answerInput");
+  const checkButton = $("checkButton");
+  const nextButton = $("nextButton");
+
+  const feedback = $("feedback");
+  const explanation = $("explanation");
+  const explanationTitle = $("explanationTitle");
+
+  const numberLine = $("numberLine");
+  const direction = $("direction");
+  const formula = $("formula");
+
+  /* ========================================
+     STATE
+     ======================================== */
+
+  let problem;
+  let previousKey = "";
+
+  function randomInt(min, max) {
+    return Math.floor(
+      Math.random() * (max - min + 1)
+    ) + min;
+  }
+
+  function fmt(number) {
+    return Number(number.toFixed(2)).toString();
+  }
+
+  /* ========================================
+     GENERATE PROBLEM
+
+     The seven data values are symmetric
+     around the mean.
+
+     This guarantees the mean is always
+     a whole number.
+
+     ======================================== */
+
+  function makeProblem() {
+
+    let p;
+
+    do {
+
+      const mean = randomInt(30, 80);
+
+      const a = randomInt(3, 8);
+      const b = a + randomInt(2, 7);
+      const c = b + randomInt(3, 10);
+
+      const offsets = [
+        -c, -b, -a, 0, a, b, c
+      ];
+
+      const data = offsets.map(
+        value => mean + value
+      );
+
+      /* Population standard deviation */
+
+      const exactSD = Math.sqrt(
+        2 * (a*a + b*b + c*c) / 7
+      );
+
+      const sd = Number(
+        exactSD.toFixed(2)
+      );
+
+      const possibleTargets = [
+        0, 1, 2, 4, 5, 6
+      ];
+
+      const index = possibleTargets[
+        randomInt(0, possibleTargets.length - 1)
+      ];
+
+      const x = data[index];
+
+      /* Use displayed SD for answer */
+
+      const z = Number(
+        ((x - mean) / sd).toFixed(2)
+      );
+
+      p = {
+        mean,
+        sd,
+        data,
+        index,
+        x,
+        z,
+        key: data.join(",") + ":" + index
+      };
+
+    } while (p.key === previousKey);
+
+    previousKey = p.key;
+
+    return p;
+  }
+
+  /* ========================================
+     RESET FEEDBACK
+     ======================================== */
+
+  function resetFeedback() {
+
+    feedback.hidden = true;
+    feedback.textContent = "";
+    feedback.className = "feedback";
+
+    explanation.hidden = true;
+
+    answerInput.classList.remove(
+      "wrong",
+      "right"
+    );
+  }
+
+  /* ========================================
+     NEW PROBLEM
+     ======================================== */
+
+  function newProblem() {
+
+    problem = makeProblem();
+
+    dataSet.innerHTML = problem.data.map(
+      (value, index) => {
+
+        const selected =
+          index === problem.index;
+
+        return `
+          <span class="data-value ${
+            selected ? "target" : ""
+          }">
+            ${value}
+          </span>
+        `;
+      }
+    ).join("");
+
+    meanValue.textContent =
+      problem.mean;
+
+    sdValue.textContent =
+      fmt(problem.sd);
+
+    targetValue.textContent =
+      problem.x;
+
+    answerInput.value = "";
+    answerInput.disabled = false;
+    checkButton.disabled = false;
+
+    resetFeedback();
+  }
+
+  /* ========================================
+     SHOW FEEDBACK
+     ======================================== */
+
+  function showFeedback(text, correct) {
+
+    feedback.textContent = text;
+
+    feedback.className =
+      "feedback " + (correct ? "good" : "bad");
+
+    feedback.hidden = false;
+
+    answerInput.classList.toggle(
+      "right",
+      correct
+    );
+
+    answerInput.classList.toggle(
+      "wrong",
+      !correct
+    );
+  }
+
+  /* ========================================
+     FRACTION HTML
+     ======================================== */
+
+  function fraction(top, bottom) {
+
+    return `
+      <span class="fraction">
+        <span class="top">${top}</span>
+        <span class="bottom">${bottom}</span>
+      </span>
+    `;
+  }
+
+  /* ========================================
+     WORKED FORMULA
+     ======================================== */
+
+  function drawFormula() {
+
+    const { mean, sd, x, z } = problem;
+
+    const difference = x - mean;
+
+    formula.innerHTML = `
+      <span>z =</span>
+
+      ${fraction("x − μ", "σ")}
+
+      <span>=</span>
+
+      ${fraction(
+        `${x} − ${mean}`,
+        fmt(sd)
+      )}
+
+      <span>=</span>
+
+      ${fraction(
+        difference,
+        fmt(sd)
+      )}
+
+      <span>=</span>
+
+      <span class="final-value">
+        ${fmt(z)}
+      </span>
+    `;
+  }
+
+  /* ========================================
+     NUMBER LINE
+
+     Updated:
+     Arrow moved upward to y = 30.
+     Label moved upward to y = 19.
+
+     Target-value label remains at y = 73.
+
+     ======================================== */
+
+  function drawNumberLine() {
+
+    const { mean, sd, x, z } = problem;
+
+    const min = mean - 3 * sd;
+    const max = mean + 3 * sd;
+
+    const position = value =>
+      58 + (value - min) / (max - min) * 534;
+
+    const mid = position(mean);
+    const target = position(x);
+
+    const axis = 105;
+
+    let svg = `
+      <line
+        x1="46"
+        y1="${axis}"
+        x2="604"
+        y2="${axis}"
+        stroke="#475569"
+        stroke-width="1.8"
+      />
+    `;
+
+    /* Standard deviation ticks */
+
+    for (let step = -3; step <= 3; step++) {
+
+      const px = position(
+        mean + step * sd
+      );
+
+      svg += `
+        <line
+          x1="${px}"
+          y1="98"
+          x2="${px}"
+          y2="112"
+          stroke="#64748b"
+          stroke-width="1.5"
+        />
+
+        <text
+          x="${px}"
+          y="132"
+          text-anchor="middle"
+          fill="#334155"
+          font-size="13"
+        >
+          ${fmt(mean + step * sd)}
+        </text>
+
+        <text
+          x="${px}"
+          y="155"
+          text-anchor="middle"
+          fill="#64748b"
+          font-size="12"
+        >
+          ${step > 0 ? "+" : ""}${step} SD
+        </text>
+      `;
+    }
+
+    /* DISTANCE ARROW — MOVED HIGHER */
+
+    if (target !== mid) {
+
+      const left = Math.min(mid, target);
+      const right = Math.max(mid, target);
+
+      const signed =
+        (z > 0 ? "+" : "") + fmt(z);
+
+      svg += `
+        <line
+          x1="${left}"
+          y1="30"
+          x2="${right}"
+          y2="30"
+          stroke="#2563eb"
+          stroke-width="4"
+          stroke-linecap="round"
+        />
+
+        <path
+          d="
+            M ${left + 6} 24
+            L ${left} 30
+            L ${left + 6} 36
+
+            M ${right - 6} 24
+            L ${right} 30
+            L ${right - 6} 36
+          "
+          fill="none"
+          stroke="#2563eb"
+          stroke-width="2"
+        />
+
+        <text
+          x="${(mid + target) / 2}"
+          y="19"
+          text-anchor="middle"
+          fill="#2563eb"
+          font-size="15"
+          font-weight="700"
+        >
+          ${signed} SD
+        </text>
+      `;
+    }
+
+    /* Mean marker */
+
+    svg += `
+      <circle
+        cx="${mid}"
+        cy="${axis}"
+        r="5"
+        fill="#334155"
+      />
+
+      <text
+        x="${mid}"
+        y="179"
+        text-anchor="middle"
+        font-size="12"
+        fill="#334155"
+      >
+        Mean
+      </text>
+    `;
+
+    /* Target-value marker */
+
+    svg += `
+      <line
+        x1="${target}"
+        y1="78"
+        x2="${target}"
+        y2="98"
+        stroke="#2563eb"
+        stroke-width="2.5"
+      />
+
+      <circle
+        cx="${target}"
+        cy="${axis}"
+        r="7"
+        fill="#2563eb"
+        stroke="white"
+        stroke-width="2"
+      />
+
+      <text
+        x="${target}"
+        y="73"
+        text-anchor="middle"
+        font-size="16"
+        font-weight="700"
+        fill="#2563eb"
+      >
+        ${x}
+      </text>
+    `;
+
+    numberLine.innerHTML = svg;
+
+    /* Interpretation */
+
+    if (z === 0) {
+
+      direction.textContent =
+        `${x} is at the mean. Its z-score is 0.`;
+
+    } else {
+
+      const aboveOrBelow =
+        z > 0 ? "ABOVE" : "BELOW";
+
+      direction.textContent =
+        `${x} is ${fmt(Math.abs(z))} standard deviations ${aboveOrBelow} the mean.`;
+    }
+  }
+
+  /* ========================================
+     CHECK ANSWER
+     ======================================== */
+
+  function checkAnswer() {
+
+    if (!problem) {
+      return;
+    }
+
+    const raw = answerInput.value
+      .trim()
+      .replace(/−/g, "-");
+
+    /* Validate input */
+
+    if (
+      raw === "" ||
+      !/^[+-]?(?:\d+\.?\d*|\.\d+)$/.test(raw)
+    ) {
+
+      showFeedback(
+        "✕ Please enter a valid number.",
+        false
+      );
+
+      explanation.hidden = true;
+
+      return;
+    }
+
+    const answer = Number(raw);
+
+    if (!Number.isFinite(answer)) {
+
+      showFeedback(
+        "✕ Please enter a valid number.",
+        false
+      );
+
+      explanation.hidden = true;
+
+      return;
+    }
+
+    /* Compare to z-score rounded to 2 decimals */
+
+    const correct =
+      Math.abs(answer - problem.z) < 0.005;
+
+    if (correct) {
+
+      showFeedback(
+        "✓ Correct!",
+        true
+      );
+
+      explanationTitle.textContent =
+        "Your z-score on the number line";
+
+      answerInput.disabled = true;
+      checkButton.disabled = true;
+
+    } else {
+
+      showFeedback(
+        "✕ Incorrect — Here's how to find it.",
+        false
+      );
+
+      explanationTitle.textContent =
+        "How to find the z-score";
+    }
+
+    /* Explanations appear only after checking */
+
+    drawNumberLine();
+    drawFormula();
+
+    explanation.hidden = false;
+  }
+
+  /* ========================================
+     EVENTS
+     ======================================== */
+
+  checkButton.addEventListener(
+    "click",
+    checkAnswer
+  );
+
+  answerInput.addEventListener(
+    "keydown",
+    event => {
+
+      if (event.key === "Enter") {
+
+        event.preventDefault();
+
+        if (!checkButton.disabled) {
+          checkAnswer();
+        }
+      }
+    }
+  );
+
+  answerInput.addEventListener(
+    "input",
+    resetFeedback
+  );
+
+  nextButton.addEventListener(
+    "click",
+    newProblem
+  );
+
+  /* ========================================
+     START
+     ======================================== */
+
+  newProblem();
+
+})();
+</script>
+
+</body>
+</html>
